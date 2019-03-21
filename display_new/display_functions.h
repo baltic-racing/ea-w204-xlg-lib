@@ -13,6 +13,8 @@
 
 
 //DEFINES
+#define CURSOR_BLINKING  false
+#define CURSOR_ENABLED  false
 
 //Config defines
 //0 for 1 line displays

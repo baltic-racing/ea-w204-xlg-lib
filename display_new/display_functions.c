@@ -11,8 +11,8 @@
 static bool sc_bit = SHIFTDISPLAY;
 static bool shift = SHIFTDIRECTION;
 static bool autoshift = ENABLE_SHIFT;
-static bool cursor_blinking = false;
-static bool cursor_enabled = false;
+static bool cursor_blinking = CURSOR_BLINKING;
+static bool cursor_enabled = CURSOR_ENABLED;
 static bool power_on = false;
 static uint8_t data_to_write = 0;
 
@@ -160,12 +160,20 @@ void Display_shift_Display_Or_Cursor(bool Shift_Display){
 }
 void Display_Create_Char(uint8_t CGRAM_Position, uint8_t character[8]){
 	
+	Display_Write_Data(0x40+8*CGRAM_Position,0,0);
+
+	//write each line
+	for(uint8_t x = 0; x < 8; x++){
+		
+		Display_Write_Data(character[x],1,0);
+		
+	}
 	
 }
 
 void Display_Write_Char(char data){
 	
-	
+	Display_Write_Data(data,1,0);
 	
 }
 
@@ -190,7 +198,11 @@ void Display_Clear(){
 }
 void Display_Write_String(char *to_write){
 	
-	
+	for(uint8_t x = 0; x < sizeof(to_write); x++){
+		
+		Display_Write_Char(to_write[x]);
+		
+	}
 	
 }
 void Display_Power(bool on){

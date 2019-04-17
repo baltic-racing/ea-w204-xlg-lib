@@ -6,15 +6,25 @@
  */ 
 #include <avr/io.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stddef.h>
 #include "display_functions.h"
 
 static bool sc_bit = SHIFTDISPLAY;
 static bool shift = SHIFTDIRECTION;
 static bool autoshift = ENABLE_SHIFT;
-static bool cursor_blinking = CURSOR_BLINKING;
+static uint8_t cursor_blinking = CURSOR_BLINKING;
 static bool cursor_enabled = CURSOR_ENABLED;
 static bool power_on = false;
 static uint8_t data_to_write = 0;
+
+uint8_t dsp_line[4] ={
+	//This order is known by Trial and Error
+	0x80, //Line 1
+	0xC0, //Line 4
+	0x94, //Line 2
+	0xD4, //Line 3
+};
 
 void Display_Enable(void){
 
@@ -178,14 +188,17 @@ void Display_Write_Char(char data){
 }
 
 void Display_Goto_Position(uint8_t Line, uint8_t Row){
-	
-	
+	Display_Write_Data(dsp_line[Line]+Row, 0, 0);	
 }
+
 void Display_Autoincrement(bool increment){
 	
 	
 	
 }
+
+#include <avr/delay.h>
+
 void Display_Clear(){
 	
 	Display_Write_Data(1,0,0);
@@ -193,12 +206,14 @@ void Display_Clear(){
 		//wait until the display isn't busy anymore
 		
 	}
+	_delay_ms(20); // Hacky fix since is_busy DOES NOT WORK!!!
+	//Display_Write_Data(0x02, 0, 0);  // Go home
 	
 	
 }
 void Display_Write_String(char *to_write){
 	
-	for(uint8_t x = 0; x < sizeof(to_write); x++){
+	for(size_t x = 0; x < strlen(to_write); x++){
 		
 		Display_Write_Char(to_write[x]);
 		
@@ -207,12 +222,18 @@ void Display_Write_String(char *to_write){
 }
 void Display_Power(bool on){
 	
-	data_to_write = 0b00001000 | (on<<2) (cursor_enabled<<1) | (cursor_blinking<<1);
+	data_to_write = 0b00001000 | (on<<2) | (cursor_enabled<<1) | (cursor_blinking<<1);
 	Display_Write_Data(data_to_write,0,0);
 	
 }
 void Display_Setup(void){
 	
+	Display_Write_Data(0x39,0,0);
+	Display_Write_Data(0x08,0,0);
+	Display_Write_Data(0x06,0,0);
+	Display_Write_Data(0x17,0,0);
+	Display_Write_Data(0x02,0,0);
+	Display_Write_Data(0x0C,0,0);
 	
 }
 void Display_Return_Home(void){
@@ -222,7 +243,7 @@ void Display_Return_Home(void){
 }
 void Display_Enable_Cursor(bool on){
 
-	data_to_write = 0b00001000 | (power_on<<2)  (on<<1) | cursor_blinking;
+	data_to_write = 0b00001000 | (power_on<<2) | (on<<1) | cursor_blinking;
 	cursor_enabled = on;
 	Display_Write_Data(data_to_write,0,0);	
 	
@@ -235,3 +256,52 @@ void Display_Enable_Cursor_Blinking(bool on){
 	Display_Write_Data(data_to_write,0,0);
 	
 }
+
+
+void Display_Define_Custom_Character(
+	uint8_t charpos, uint8_t line1, uint8_t line2, uint8_t line3, uint8_t line4, uint8_t line5, uint8_t line6, uint8_t line7, uint8_t line8
+) {
+    /*
+     * TODO: Evaluate this function and improve signature.
+     *
+     * */
+    //where to write in cgram
+    Display_Write_Data(0x40+8*charpos, 0, 0);
+
+    //write each line
+    Display_Write_Data(line1, 1, 0);
+    Display_Write_Data(line2, 1, 0);
+    Display_Write_Data(line3, 1, 0);
+    Display_Write_Data(line4, 1, 0);
+    Display_Write_Data(line5, 1, 0);
+    Display_Write_Data(line6, 1, 0);
+    Display_Write_Data(line7, 1, 0);
+    Display_Write_Data(line8, 1, 0);
+
+    //dsiplay return home
+    Display_Write_Data(0x02, 0, 0);
+}
+
+
+/*
+uint8_t dsp_command [7] = {
+
+	0x39, //function set european chararacter set
+
+	0x08, //display off
+
+	0x06, //entry mode set increment cursor by 1 not shifting display
+
+	0x17, //Character mode and internal power on
+
+	0x00, //0x01, //clear display NEVER USE CLS IT WILL GET THE DISPLAY HOT SICNE EXECUTION TIME >2 ms
+
+	0x02, //return home
+
+	0x0C, //display on
+
+};
+*/
+
+
+

@@ -50,14 +50,14 @@
 //PIN Defines
 
 //RS Pin connceted to display
-#define RSPIN PB1
-#define RSPINPORT PORTB
+#define RSPIN PC0
+#define RSPINPORT PORTC
 //RW Pin connected to display
-#define RWPIN PB0
-#define RWPINPORT PORTB
+#define RWPIN PC1
+#define RWPINPORT PORTC
 //Enable Pin connected to display
-#define ENABLEPIN PB2
-#define ENABLEPINPORT PORTB
+#define ENABLEPIN PC2
+#define ENABLEPINPORT PORTC
 
 //is a whole port for display Communication used?
 //decides if we are using Display_Write_Data()for a single port or for split/mirrored port
@@ -65,9 +65,9 @@
 
 #if Wholeportused == 1
 //if you use a whole port for comunication with the display it is enough to define the dataport and use the Display_Write_Data() function
-	#define DATAPORT PORTD
-	#define DATADDR DDRD
-	#define DATAPIN PIND
+	#define DATAPORT PORTE
+	#define DATADDR DDRE
+	#define DATAPIN PINE
 #else
 	//if the dataport is mirrored or split onto different port it requires the definition of the following to
 	//communicate with the display and the use of the dunction Display_Write_Data_Individual() instead of Display_Write_Data()

@@ -26,6 +26,10 @@ uint8_t dsp_line[4] ={
 	0xD4, //Line 3
 };
 
+/**
+ * @brief Strobe the enable pin
+ * 
+ */
 void Display_Enable(void){
 
 	ENABLEPINPORT |= (1<<ENABLEPIN);
@@ -39,33 +43,46 @@ void Display_Enable(void){
 	ENABLEPINPORT &= ~(1<<ENABLEPIN);
 
 }
-//implementation needs to be finished
+
+/**
+ * @brief Put data port into read-mode
+ * 
+ */
 void Display_Read_Enable(void){
 	#if Wholeportused == 1
 	
 		DATADDR = 0x00;
 	
 	#else
-	
-	
+		//TODO implementation needs to be finished
 	#endif
 
 
 }
-//implementation needs to be finished
+
+/**
+ * @brief Put data port into write-mode
+ * 
+ */
 void Display_Read_Disable(void){
 	#if Wholeportused == 1
 		
 		DATADDR = 0xFF;
 	
 	#else
-	
-	
+		//TODO implementation needs to be finished
 	#endif
 
 
 }
-//implementation needs to be finished
+
+/**
+ * @brief Write data to the display
+ * 
+ * @param data data to be written
+ * @param rs state of RS pin
+ * @param rw state of RW pin
+ */
 void Display_Write_Data(uint8_t data, uint8_t rs, uint8_t rw){
 
 	Display_Write_RS_RW(rs,rw);
@@ -74,14 +91,18 @@ void Display_Write_Data(uint8_t data, uint8_t rs, uint8_t rw){
 		DATAPORT = data;
 	
 	#else
-	
-		//to be implemented
-		
-	
+		//TODO implementation needs to be finished
 	#endif
 	Display_Enable();
 
 }
+
+/**
+ * @brief Set the state of the RS and RW pins
+ * 
+ * @param rs state of RS pin
+ * @param rw state of RW pin
+ */
 void Display_Write_RS_RW(uint8_t rs, uint8_t rw){
 
 	if(rs == 1){
@@ -100,7 +121,12 @@ void Display_Write_RS_RW(uint8_t rs, uint8_t rw){
 		}
 	}
 }
-//implementation needs to be finished
+
+/**
+ * @brief Read from the CGRAM
+ * 
+ * @return uint8_t read byte
+ */
 uint8_t Display_Read_CGRAM(void){
 	
 	Display_Read_Enable();
@@ -113,17 +139,21 @@ uint8_t Display_Read_CGRAM(void){
 		returndata = DATAPIN;
 	
 	#else
-		
-		//to be implemented
-	
+		//TODO implementation needs to be finished
 	#endif
 	Display_Read_Disable();
 	
 	return returndata;
 }
-//implementation needs to be finished
+
+
+/**
+ * @brief Check busy state of the display
+ * 
+ * @return struct busy busy-information of the display
+ */
 struct busy Display_Read_BUSY(void){
-	
+	//TODO implementation needs to be finished	
 	struct busy returnvalue;
 	returnvalue.is_busy = 0;
 	returnvalue.adresscounter = 0;
@@ -146,28 +176,59 @@ struct busy Display_Read_BUSY(void){
 
 	return returnvalue;
 }
+
+/**
+ * @brief Set the CGRAM (character generator RAM) position of the display controller
+ * 
+ * @param position CGRAM position/address
+ */
 void Display_Set_CGRAM_Pos(uint8_t position){
 	
 	data_to_write = 0b01000000 | (position & 0b00111111);
 	Display_Write_Data(data_to_write,0,0);
 
 }
+
+/**
+ * @brief Set the DDRAM (display data RAM) position of the display controller
+ * 
+ * @param position DDRAM position/address
+ */
 void Display_Set_DDRAM_Pos(uint8_t position){
 	
 	data_to_write = 0b10000000 | (position & 0b01111111);
 	Display_Write_Data(data_to_write,0,0);
 	
 }
+
+/**
+ * @brief Change the font table to the selected character set
+ * 
+ * @param fonttable ID of the font table/character set
+ */
 void Display_Change_Fonttable(uint8_t fonttable){
 	
 	data_to_write = 0b00110000 | LINECOUNT << 3 | (fonttable & 0b11);
 	Display_Write_Data(data_to_write,0,0);
 
 }
+
+/**
+ * @brief Select whether display of cursor get's shifted
+ * 
+ * @param Shift_Display display get's shifted if true
+ */
 void Display_shift_Display_Or_Cursor(bool Shift_Display){
 	
 	
 }
+
+/**
+ * @brief Create and store a custom character
+ * 
+ * @param CGRAM_Position position of the character in CGRAM
+ * @param character array containing all lines of the character
+ */
 void Display_Create_Char(uint8_t CGRAM_Position, uint8_t character[8]){
 	
 	Display_Write_Data(0x40+8*CGRAM_Position,0,0);
@@ -181,16 +242,32 @@ void Display_Create_Char(uint8_t CGRAM_Position, uint8_t character[8]){
 	
 }
 
+/**
+ * @brief Write character to display
+ * 
+ * @param data character to be written
+ */
 void Display_Write_Char(char data){
 	
 	Display_Write_Data(data,1,0);
 	
 }
 
+/**
+ * @brief Go to cursor position
+ * 
+ * @param Line target line
+ * @param Row target row
+ */
 void Display_Goto_Position(uint8_t Line, uint8_t Row){
 	Display_Write_Data(dsp_line[Line]+Row, 0, 0);	
 }
 
+/**
+ * @brief Set whether the cursor position auto-increments on character-writes
+ * 
+ * @param increment auto-increment if true
+ */
 void Display_Autoincrement(bool increment){
 	
 	
@@ -199,6 +276,10 @@ void Display_Autoincrement(bool increment){
 
 #include <avr/delay.h>
 
+/**
+ * @brief Clear entire display area
+ * 
+ */
 void Display_Clear(){
 	
 	Display_Write_Data(1,0,0);
@@ -211,6 +292,12 @@ void Display_Clear(){
 	
 	
 }
+
+/**
+ * @brief Write string to display
+ * 
+ * @param to_write String to be written (pointer to char-array)
+ */
 void Display_Write_String(char *to_write){
 	
 	for(size_t x = 0; x < strlen(to_write); x++){
@@ -220,27 +307,48 @@ void Display_Write_String(char *to_write){
 	}
 	
 }
+
+/**
+ * @brief Set the display power-state
+ * 
+ * @param on display turned on if true
+ */
 void Display_Power(bool on){
 	
 	data_to_write = 0b00001000 | (on<<2) | (cursor_enabled<<1) | (cursor_blinking<<1);
 	Display_Write_Data(data_to_write,0,0);
 	
 }
+
+/**
+ * @brief Setup the display
+ * 
+ */
 void Display_Setup(void){
-	
-	Display_Write_Data(0x39,0,0);
-	Display_Write_Data(0x08,0,0);
-	Display_Write_Data(0x06,0,0);
-	Display_Write_Data(0x17,0,0);
-	Display_Write_Data(0x02,0,0);
-	Display_Write_Data(0x0C,0,0);
+	Display_Write_Data(0x39,0,0);	//European character set
+	Display_Write_Data(0x08,0,0);	//Display off
+	Display_Write_Data(0x06,0,0);	//Increment cursor by 1 and don't shift display
+	Display_Write_Data(0x17,0,0);	//Character mode, internal power on
+	Display_Write_Data(0x02,0,0);	//Return home
+	Display_Write_Data(0x0C,0,0);	//Display on
 	
 }
+
+/**
+ * @brief Set cursor position to (0,0)
+ * 
+ */
 void Display_Return_Home(void){
 	
 	Display_Write_Data(0b10,0,0);
 	
 }
+
+/**
+ * @brief Set cursor-display status
+ * 
+ * @param on Cursor visible if true
+ */
 void Display_Enable_Cursor(bool on){
 
 	data_to_write = 0b00001000 | (power_on<<2) | (on<<1) | cursor_blinking;
@@ -249,6 +357,11 @@ void Display_Enable_Cursor(bool on){
 	
 }
 
+/**
+ * @brief Set cursor blinking status
+ * 
+ * @param on Cursor blinks if true
+ */
 void Display_Enable_Cursor_Blinking(bool on){
 	
 	data_to_write = 0b00001000 | (power_on<<2) | (cursor_enabled<<1) | on;
@@ -257,7 +370,19 @@ void Display_Enable_Cursor_Blinking(bool on){
 	
 }
 
-
+/**
+ * @brief Create and store a custom character
+ * 
+ * @param charpos position of character in CGRAM
+ * @param line1 line 1 of character graphic
+ * @param line2 line 2 of character graphic
+ * @param line3 line 3 of character graphic
+ * @param line4 line 4 of character graphic
+ * @param line5 line 5 of character graphic
+ * @param line6 line 6 of character graphic
+ * @param line7 line 7 of character graphic
+ * @param line8 line 8 of character graphic
+ */
 void Display_Define_Custom_Character(
 	uint8_t charpos, uint8_t line1, uint8_t line2, uint8_t line3, uint8_t line4, uint8_t line5, uint8_t line6, uint8_t line7, uint8_t line8
 ) {
@@ -265,6 +390,8 @@ void Display_Define_Custom_Character(
      * TODO: Evaluate this function and improve signature.
      *
      * */
+//TODO difference to void Display_Create_Char(uint8_t CGRAM_Position, uint8_t character[8])?
+
     //where to write in cgram
     Display_Write_Data(0x40+8*charpos, 0, 0);
 

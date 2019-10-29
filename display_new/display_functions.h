@@ -143,6 +143,13 @@ void Display_Return_Home(void);
 void Display_Goto_Position(uint8_t Line, uint8_t Row);
 
 //
+//Display Help Functions
+//
+void Display_Write_Large_Number(uint8_t start_position, uint8_t number);
+void Display_Large_Number_Helper(uint8_t start_position, uint8_t firstline_0, uint8_t firstline_1, uint8_t firstline_2, uint8_t secondline_0, uint8_t secondline_1, uint8_t secondline_2,
+								 uint8_t thirdline_0, uint8_t thirdline_1, uint8_t thirdline_2, uint8_t fourthline_0, uint8_t fourthline_1, uint8_t fourthline_2);
+
+//
 //Display Config Functions
 //
 

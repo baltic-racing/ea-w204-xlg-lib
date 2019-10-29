@@ -42,11 +42,12 @@ void Display_Enable(void){
 //implementation needs to be finished
 void Display_Read_Enable(void){
 	#if Wholeportused == 1
-	
+		
+		DATAPORT = 0;
 		DATADDR = 0x00;
 	
 	#else
-	
+		//TODO: Implement
 	
 	#endif
 
@@ -56,10 +57,11 @@ void Display_Read_Enable(void){
 void Display_Read_Disable(void){
 	#if Wholeportused == 1
 		
+		DATAPORT = 0;
 		DATADDR = 0xFF;
 	
 	#else
-	
+		//TODO: Implement
 	
 	#endif
 
@@ -75,8 +77,7 @@ void Display_Write_Data(uint8_t data, uint8_t rs, uint8_t rw){
 	
 	#else
 	
-		//to be implemented
-		
+		//TODO: Implement		
 	
 	#endif
 	Display_Enable();
@@ -114,7 +115,7 @@ uint8_t Display_Read_CGRAM(void){
 	
 	#else
 		
-		//to be implemented
+		//TODO: Implement
 	
 	#endif
 	Display_Read_Disable();
@@ -188,7 +189,9 @@ void Display_Write_Char(char data){
 }
 
 void Display_Goto_Position(uint8_t Line, uint8_t Row){
+	
 	Display_Write_Data(dsp_line[Line]+Row, 0, 0);	
+
 }
 
 void Display_Autoincrement(bool increment){
@@ -280,6 +283,124 @@ void Display_Define_Custom_Character(
 
     //dsiplay return home
     Display_Write_Data(0x02, 0, 0);
+}
+
+//this is a helper Function for the write large number function where firstline_0 is the first char of the first line and firstline_2 the last char of the first line
+//then it goes on to the second line, the third and lastly the fourth line for the 3x4 Char
+void Display_Large_Number_Helper(uint8_t start_position, uint8_t firstline_0, uint8_t firstline_1, uint8_t firstline_2, uint8_t secondline_0, uint8_t secondline_1, uint8_t secondline_2,
+								uint8_t thirdline_0, uint8_t thirdline_1, uint8_t thirdline_2, uint8_t fourthline_0, uint8_t fourthline_1, uint8_t fourthline_2){
+	
+	//Display Goto Position is used so often because we dont know if the User disabled Autoincrement
+	Display_Goto_Position(start_position,0);
+	Display_Write_Char(firstline_0);
+	Display_Goto_Position(start_position+1,0);
+	Display_Write_Char(firstline_1);
+	Display_Goto_Position(start_position+2,0);
+	Display_Write_Char(firstline_2);
+	Display_Goto_Position(start_position,1);
+	Display_Write_Char(secondline_0);
+	Display_Goto_Position(start_position+1,1);
+	Display_Write_Char(secondline_1);
+	Display_Goto_Position(start_position+2,1);
+	Display_Write_Char(secondline_2);
+	Display_Goto_Position(start_position,2);
+	Display_Write_Char(thirdline_0);
+	Display_Goto_Position(start_position+1,2);
+	Display_Write_Char(thirdline_1);
+	Display_Goto_Position(start_position+2,2);
+	Display_Write_Char(thirdline_2);
+	Display_Goto_Position(start_position,3);
+	Display_Write_Char(thirdline_0);
+	Display_Goto_Position(start_position+1,3);
+	Display_Write_Char(thirdline_1);
+	Display_Goto_Position(start_position+2,3);
+	Display_Write_Char(thirdline_2);
+	
+}
+
+ // ONLY NUMBERS FROM 0-9!!!!!!!!!!!!!
+ //	Writes a 3x4 Char Large number onto the screen where the starting position is the top left corner of the number in the first line
+ /////////////////////////////////////////////////////////////////////////////////////
+ //																					//
+ //									CAUTION											//
+ //																					//
+ /////////////////////////////////////////////////////////////////////////////////////
+ //																					//
+ //	requires the following custom chars to be defined!								//
+ //																					//
+ //																					//
+ //		Display_Define_Custom_Character(1,0x1F,0x1F,0,0,0,0,0,0);					//
+ //		Display_Define_Custom_Character(2,0xEF,0xEF,0xEF,0xEF,0xEF,0xEF,0xEF,0xEF);	//
+ //		Display_Define_Custom_Character(3,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E);	//
+ //		Display_Define_Custom_Character(4,0xFF,0xFF,0xFF,0xFF,0,0,0,0);				//
+ //		Display_Define_Custom_Character(5,0xFF,0xFF,0xFF,0xFF,0xEF,0xEF,0xEF,0xEF);	//
+ //		Display_Define_Custom_Character(6,0x08,0x15,0x0A,0x04,0x0A,0x15,0x02,0x00);	//
+ //		Display_Define_Custom_Character(7,0,0,0,0,0,0x1F,0x1F,0x1F);				//
+ //																					//
+ /////////////////////////////////////////////////////////////////////////////////////
+ 
+void Display_Write_Large_Number(uint8_t start_position, uint8_t number){
+	
+	switch (number){
+
+		//Number 0
+		case 0:
+			 Display_Large_Number_Helper(start_position, 0xFF, 0xFF, 0xFF, 0xFF,0x10, 0xFF, 0xFF, 0x10, 0xFF, 0xFF, 0xFF, 0xFF);
+			break;
+		//Number 1
+		case 1:
+			Display_Large_Number_Helper(start_position, 0x10, 0xFF, 0xFF, 0x10, 0x10, 0xFF, 0x10, 0x10, 0xFF, 0x10, 0x10, 0xFF);
+			break;
+
+		//Number 2
+		case 2:
+			Display_Large_Number_Helper(start_position, 0xFF, 0xFF, 0xFF, 0x07, 0x07, 0xFF, 0xFF, 0x01, 0x01, 0xFF, 0xFF, 0xFF);
+			break;
+
+		//Number 3
+		case 3:
+			Display_Large_Number_Helper(start_position, 0xFF, 0xFF, 0xFF, 0x07, 0x07, 0xFF, 0x01, 0x01, 0xFF, 0xFF, 0xFF, 0xFF);
+			break;
+
+		//Number 4
+		case 4:
+			Display_Large_Number_Helper(start_position,0x03 ,0x10, 0x10, 0x03, 0x02, 0x10, 0x04, 0x05, 0x04, 0x10, 0x02, 0x10);
+			break;
+
+		//Number 5
+		case 5:
+			Display_Large_Number_Helper(start_position, 0xFF, 0xFF, 0xFF, 0xFF, 0x07, 0x07, 0x01, 0x01, 0xFF, 0xFF, 0xFF, 0xFF);
+			break;
+
+		//Number 6
+		case 6:
+			Display_Large_Number_Helper(start_position, 0xFF, 0xFF, 0xFF, 0xFF, 0x07, 0x07, 0xFF, 0x10, 0xFF, 0xFF, 0xFF, 0xFF);
+			break;
+			
+		//Number 7
+		case 7:
+			Display_Large_Number_Helper(start_position, 0xFF, 0xFF, 0xFF, 0x10, 0x10, 0xFF, 0x10, 0x10, 0xFF, 0x10, 0x10, 0xFF);
+			break;
+			
+		//Number 8
+		case 8:
+			Display_Large_Number_Helper(start_position, 0xFF, 0x01, 0xFF, 0xFF, 0x07, 0xFF, 0xFF, 0x01, 0xFF, 0xFF, 0x07, 0xFF);
+			break;
+			
+		//Number 9
+		case 9:
+			Display_Large_Number_Helper(start_position, 0xFF, 0x01, 0xFF, 0xFF, 0x07, 0xFF, 0x10, 0x01, 0xFF, 0xFF, 0x07, 0xFF);
+			break;
+			
+		//if no valid number was transmitted
+		default:
+			Display_Large_Number_Helper(start_position, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+			break;
+	}
+	
+	
+	
+	
 }
 
 

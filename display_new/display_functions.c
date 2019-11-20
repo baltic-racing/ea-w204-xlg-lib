@@ -31,9 +31,10 @@ void Display_Enable(void){
 	ENABLEPINPORT |= (1<<ENABLEPIN);
 	
 	#if ENABLE_WAIT == 1
-	for(uint8_t x = 255; x>0;){
-		x--;
-	}
+		//burning some cpu cycles in the worst way possible lol
+		for(uint8_t x = 255; x>0;){
+			x--;
+		}
 	#endif
 		
 	ENABLEPINPORT &= ~(1<<ENABLEPIN);
@@ -47,7 +48,25 @@ void Display_Read_Enable(void){
 		DATADDR = 0x00;
 	
 	#else
-		//TODO: Implement
+	//dont know if this even works lol
+	//erase data on Pin
+		DATAPIN0PORT &= ~(1<<DATAPIN0);
+		DATAPIN1PORT &= ~(1<<DATAPIN1);
+		DATAPIN2PORT &= ~(1<<DATAPIN2);
+		DATAPIN3PORT &= ~(1<<DATAPIN3);
+		DATAPIN4PORT &= ~(1<<DATAPIN4);
+		DATAPIN5PORT &= ~(1<<DATAPIN5);
+		DATAPIN6PORT &= ~(1<<DATAPIN6);
+		DATAPIN7PORT &= ~(1<<DATAPIN7);
+	//mark pin as input
+		DATAPIN0DDR &= ~(1<<DATAPIN0);
+		DATAPIN1DDR &= ~(1<<DATAPIN1);
+		DATAPIN2DDR &= ~(1<<DATAPIN2);
+		DATAPIN3DDR &= ~(1<<DATAPIN3);
+		DATAPIN4DDR &= ~(1<<DATAPIN4);
+		DATAPIN5DDR &= ~(1<<DATAPIN5);
+		DATAPIN6DDR &= ~(1<<DATAPIN6);
+		DATAPIN7DDR &= ~(1<<DATAPIN7);
 	
 	#endif
 
@@ -61,7 +80,25 @@ void Display_Read_Disable(void){
 		DATADDR = 0xFF;
 	
 	#else
-		//TODO: Implement
+	//dont know if this even works lol
+	//erase data on Pin
+		DATAPIN0PORT &= ~(1<<DATAPIN0);
+		DATAPIN1PORT &= ~(1<<DATAPIN1);
+		DATAPIN2PORT &= ~(1<<DATAPIN2);
+		DATAPIN3PORT &= ~(1<<DATAPIN3);
+		DATAPIN4PORT &= ~(1<<DATAPIN4);
+		DATAPIN5PORT &= ~(1<<DATAPIN5);
+		DATAPIN6PORT &= ~(1<<DATAPIN6);
+		DATAPIN7PORT &= ~(1<<DATAPIN7);
+	//mark pin as output
+		DATAPIN0DDR |= (1<<DATAPIN0);
+		DATAPIN1DDR |= (1<<DATAPIN1);
+		DATAPIN2DDR |= (1<<DATAPIN2);
+		DATAPIN3DDR |= (1<<DATAPIN3);
+		DATAPIN4DDR |= (1<<DATAPIN4);
+		DATAPIN5DDR |= (1<<DATAPIN5);
+		DATAPIN6DDR |= (1<<DATAPIN6);
+		DATAPIN7DDR |= (1<<DATAPIN7);
 	
 	#endif
 
@@ -76,8 +113,15 @@ void Display_Write_Data(uint8_t data, uint8_t rs, uint8_t rw){
 		DATAPORT = data;
 	
 	#else
-	
-		//TODO: Implement		
+		//dont know if this even works lol
+		DATAPIN0PORT = (DATAPIN0PIN &= ~(1<<DATAPIN0PIN)) | (data & 1<<DATAPIN0);
+		DATAPIN1PORT = (DATAPIN1PIN &= ~(1<<DATAPIN1PIN)) | (data & 1<<DATAPIN1);
+		DATAPIN2PORT = (DATAPIN2PIN &= ~(1<<DATAPIN2PIN)) | (data & 1<<DATAPIN2);
+		DATAPIN3PORT = (DATAPIN3PIN &= ~(1<<DATAPIN3PIN)) | (data & 1<<DATAPIN3);
+		DATAPIN4PORT = (DATAPIN4PIN &= ~(1<<DATAPIN4PIN)) | (data & 1<<DATAPIN4);
+		DATAPIN5PORT = (DATAPIN5PIN &= ~(1<<DATAPIN5PIN)) | (data & 1<<DATAPIN5);
+		DATAPIN6PORT = (DATAPIN6PIN &= ~(1<<DATAPIN6PIN)) | (data & 1<<DATAPIN6);
+		DATAPIN7PORT = (DATAPIN7PIN &= ~(1<<DATAPIN7PIN)) | (data & 1<<DATAPIN7);	
 	
 	#endif
 	Display_Enable();
@@ -114,8 +158,8 @@ uint8_t Display_Read_CGRAM(void){
 		returndata = DATAPIN;
 	
 	#else
-		
-		//TODO: Implement
+		//this should work hopefully
+		returndata = (DATAPIN0PIN&(1<<DATAPIN0PIN))|(DATAPIN1PIN&(1<<DATAPIN1PIN))|(DATAPIN2PIN&(1<<DATAPIN2PIN))|(DATAPIN3PIN&(1<<DATAPIN3PIN))|(DATAPIN4PIN&(1<<DATAPIN4PIN))|(DATAPIN5PIN&(1<<DATAPIN5PIN))|(DATAPIN6PIN&(1<<DATAPIN6PIN))|(DATAPIN7PIN&(1<<DATAPIN7PIN));
 	
 	#endif
 	Display_Read_Disable();
@@ -138,8 +182,9 @@ struct busy Display_Read_BUSY(void){
 	returnvalue.adresscounter = DATAPIN&0b01111111;
 	
 	#else
-	
+	//this should hopefully work
 	returnvalue.is_busy() = (DATAPIN7PIN>>DATAPIN7);
+	returnvalue.adresscounter = (DATAPIN1PIN&(1<<DATAPIN1PIN))|(DATAPIN2PIN&(1<<DATAPIN2PIN))|(DATAPIN3PIN&(1<<DATAPIN3PIN))|(DATAPIN4PIN&(1<<DATAPIN4PIN))|(DATAPIN5PIN&(1<<DATAPIN5PIN))|(DATAPIN6PIN&(1<<DATAPIN6PIN))|(DATAPIN7PIN&(1<<DATAPIN7PIN));
 	
 	#endif
 	
@@ -196,7 +241,7 @@ void Display_Goto_Position(uint8_t Line, uint8_t Row){
 
 void Display_Autoincrement(bool increment){
 	
-	
+	//TODO: Implement it someday
 	
 }
 
